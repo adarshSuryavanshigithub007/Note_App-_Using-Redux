@@ -26,7 +26,7 @@ app.get('/',(res,req)=>{
 })
 
 //routes
-app.use('/api/v1/user',require('./routes/userRoutes'))
+app.use('/api/v1/user',require('./routes/userRoutes1'))
 
 //Listen port
 const port = process.env.PORT || 8080
