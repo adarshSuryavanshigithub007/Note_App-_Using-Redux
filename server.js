@@ -26,12 +26,12 @@ app.get('/',(res,req)=>{
 })
 
 //routes
-app.use('/api/v1/user',require('./routes/userRoutes1'))
+app.use('/api/v1/user',require('./routes/userRoutes'))
 
 //Listen port
 const port = process.env.PORT || 8080
 
 app.listen(port,()=>{
-    console.log(`Server is running on dev mode ${process.env.NODE_MODE}  Server is running on porthttp://localhost: ${process.env.PORT}`.bgCyan.white)
+    console.log(`Server is running on dev mode ${process.env.NODE_MODE}  Server is running on port http://localhost: ${process.env.PORT}`.bgCyan.white)
     
 })
