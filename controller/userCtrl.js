@@ -1,65 +1,70 @@
 const mongoose = require('mongoose');
 const userModel = require('../model/userModel');
-const bcrypt = require('bcrypt');
+const { Hashpassword, comparePassword } = require('../utils/methods/hashPassword');
+const jwt = require('jsonwebtoken');
+const generateToken = require('../utils/generateToken');
 
-const RegisterController = async (req, res) => {
+const RegisterController = async (req, res,next) => {
     try {
         const existingUser = await userModel.findOne({email:req.body.email})
         if(existingUser) {
-            return res.status(409).send({
-            message: "User already exists",
-            status: 409
-        })
-    }
+            const error = new Error("User already exists");
+            error.statusCode = 409;
+            throw error;
+        }
+
         const password = req.body.password
-        // password hashing
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const hashedPassword = await Hashpassword(password, 10)
         const newUser = new userModel({
             ...req.body,
-            password: hashedPassword
+            password:hashedPassword
             
         })
         const savedUser = await newUser.save()
         res.status(201).send({
             message: `${ savedUser.name} you register in successfully`,
             status: 201,
-            data: savedUser
+            data: savedUser,
+            success:true
         })
 
     } catch (error) {
-        res.status(500).json({ message: "Something went wrong" })
+        if (!error.statusCode) error.statusCode = 500;
+        next(error);
     }
 
 }
 
-const LoginController = async(req,res)=>{
+const LoginController = async(req,res,next)=>{
     try {
         //find user
         const user = await userModel.findOne({email:req.body.email})
         console.log(user)
         if(!user) {
-            return res.status(404),send({
-                message: "User not found",
-                status: 404
-            })
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            throw error;
         }
-        const isPasswordMatch = bcrypt.compare(req.body.password , user.password)
-        console.log(isPasswordMatch)
+        const isPasswordMatch = await comparePassword(req.body.password , user.password)
+        console.log("isPasswordMatch",isPasswordMatch)
         if(!isPasswordMatch) {
-            return res.status(401).send({
-                message: "Invalid password",
-                status: 401
-            })
+            const error = new Error("Invalid password");
+            error.statusCode = 401;
+            throw error;
         }
+        //generate token
+        const token = generateToken(user._id)
+        console.log(token)
         res.status(200).send({
             message: `${ user.name} you logged in successfully`,
             status: 200,
+            success:true,
+            token
         })
     } catch (error) {
-        res.status(500).send({
-            message: "Something went wrong",
-        })
+        if (!error.statusCode) error.statusCode = 500;
+        next(error)
+
     }
 }
 

@@ -4,6 +4,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const colors = require('colors');
 const connectionDB = require('./config/db');
+const { errorHandler, notFoundMidware } = require('./middleware/ErrorHandler');
+
 
 const app = express()
 //.env
@@ -18,6 +20,7 @@ connectionDB()
 app.use(express.json())
 app.use(morgan('dev'))
 
+
 //routes
 app.get('/',(res,req)=>{
     res.status(200).send({
@@ -28,6 +31,8 @@ app.get('/',(res,req)=>{
 //routes
 app.use('/api/v1/user',require('./routes/userRoutes'))
 
+app.use(errorHandler);
+app.use(notFoundMidware);
 //Listen port
 const port = process.env.PORT || 8080
 
