@@ -30,6 +30,8 @@ app.get('/',(res,req)=>{
 
 //routes
 app.use('/api/v1/user',require('./routes/userRoutes'))
+app.use('/api/v1/note',require('./routes/noteRoutes'))
+
 
 app.use(errorHandler);
 app.use(notFoundMidware);
